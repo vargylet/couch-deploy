@@ -1,5 +1,5 @@
 # Couch Deploy
-A tiny app that will pull and redeploy your docker containers when a GitHub webhook is received. You just have to push an update to your repository.
+A tiny app that will pull and redeploy your docker containers when a GitHub webhook is received. You just have to push an update to your repository and the app does the rest.
 
 # Requirements
 ## Structure
