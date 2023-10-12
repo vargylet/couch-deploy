@@ -112,7 +112,8 @@ def api_endpoint():
         local_path = config["local_path"]
         repository_name = data['repository']['name']
 
-        if data["commits"]:
+        if "commits" in data:
+            # Verifying that "commits" is present in the received data
             # Looping the commits in the response
             for commit in data["commits"]:
 
@@ -156,10 +157,10 @@ def api_endpoint():
                     )
                     docker_restart_thread.start()
 
-                build_json_response(
-                    "No folder (no data)",
-                    "The data provided couldn't be processed or was empty."
-                )
+        build_json_response(
+            "No folder (no data)",
+            "The data provided couldn't be processed or was empty."
+        )
 
         response = {
             "result": "success",
