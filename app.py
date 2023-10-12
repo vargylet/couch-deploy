@@ -11,8 +11,12 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
+# Reading the configuration file.
 with open("config.json", "r", encoding="utf-8)") as config_file:
     config = json.load(config_file)
+
+# Defining a dictionary to store the response
+json_response = []
 
 def validate_signature(data, github_signature):
     """
@@ -64,6 +68,25 @@ def run_command(command, working_directory):
         )
         return error_message
 
+def build_json_response(docker_folder, result_message):
+    """
+    Received information about what should go into the json output and appends it.
+
+    :param docker_folder: The folder which has a change to it which will be passed to the output.
+    :type docker_folder: str
+    :param result_message: The message that will be passed to the output.
+    :type result_message: str
+    :return: A string formatted as JSON
+    :rtype: json
+    """
+    response = {
+        "folder": docker_folder,
+        "result": result_message
+    }
+
+    # Append to the response list
+    json_response.append(response)
+
 @app.route(f"/{config['path']}", methods=["POST"])
 def api_endpoint():
     """
@@ -94,17 +117,26 @@ def api_endpoint():
 
                 # Splitting the string of the modified file
                 modified_file_split = modified_file.rsplit("/", 1)
-                docker_folder = modified_file_split[0]
-                docker_file = modified_file_split[1]
+                if len(modified_file_split) >= 2:
+                    docker_folder = modified_file_split[0]
+                    docker_file = modified_file_split[1]
+                else:
+                    docker_file = modified_file_split[0]
+                    docker_folder = f"No folder ({docker_file})"
 
                 if docker_folder not in config["folders_to_trigger_on"]:
-                    api_response = {"message": "The container is not configured on this server."}
-                    return jsonify(api_response)
+                    # If the changed folder isn't configured on this server
+                    build_json_response(
+                        docker_folder,
+                        "The container is not configured on this server.")
+                    continue
 
                 if docker_file != "docker-compose.yml":
                     # If the file in the commit isn't a docker compose file, we're stopping
-                    api_response = {"message": "Nothing was changed."}
-                    return jsonify(api_response)
+                    build_json_response(
+                        docker_folder,
+                        "The updated file wasn't a docker-compose.yml file.")
+                    continue
 
                 # Pull from the repository
                 run_command(
@@ -120,15 +152,17 @@ def api_endpoint():
                 )
                 docker_restart_thread.start()
 
-        api_response = {"message": "Success"}
-        return jsonify(api_response)
+        response = {
+            "result": "success",
+            "commits": json_response
+        }
+        return jsonify(response)
 
     # Returns a 403 with an error if auth fails
-    api_response = {
-        "error": "Forbidden",
-        "message": "Invalid signature"
-    }
-    return jsonify(api_response), 403
+    response = {
+            "result": "Authentication failed."
+        }
+    return jsonify(response), 403
 
 if __name__ == "__main__":
     app.run()
