@@ -76,17 +76,19 @@ def api_endpoint():
 
     # The data from GitHub
     raw_data = request.data
-    data = json.loads(request.data) # delete?
 
     # Get the request signature and payload
     github_signature = request.headers.get("X-Hub-Signature-256")
 
     if validate_signature(raw_data, github_signature):
+
+        data = json.loads(raw_data)
+        local_path = config["local_path"]
+
         modified_file = data['commits'][0]['modified'][0]
         modified_file_cleaned = modified_file.replace("{'", "")
         modified_data = modified_file_cleaned.rsplit("/", 1)
 
-        local_path = config["local_path"]
         repository_name = data['repository']['name']
         docker_folder = modified_data[0]
         file = modified_data[1]
