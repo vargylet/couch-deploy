@@ -9,7 +9,6 @@ To use this application you need the following structure of your docker compose 
 
 ## Technical Requirements
 - python >= 3.11
-- pip
 - flask >= 2.3.3
 - gunicorn >= 21.2.0
 
