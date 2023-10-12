@@ -16,7 +16,7 @@ To use this application you need the following structure of your docker compose 
 I recommend running this application behind a reverse proxy.
 
 ## Configuration
-`config.json` holds the config that's required to run the app. Here's an example.
+`config.template.json` shows the structure of the config that's required to run the app. Here's an example.
 ```
 {
     "path": "3fc9b689459d738f8c88a3a48aa9e33542016b7a4052e001aaa536fca74813cb",
@@ -39,7 +39,8 @@ git clone
 
 # Configure a GitHub webhook if you haven't already.
 
-# Configure config.json with your editor of choice. See documentation above.
+# Copy and update config.template.json with your editor of choice. See documentation above.
+cp config.template.json config.json
 nano config.json
 
 # Choose your port and start the application.
