@@ -84,37 +84,41 @@ def api_endpoint():
 
         data = json.loads(raw_data)
         local_path = config["local_path"]
-
-        modified_file = data['commits'][0]['modified'][0]
-        modified_file_cleaned = modified_file.replace("{'", "")
-        modified_data = modified_file_cleaned.rsplit("/", 1)
-
         repository_name = data['repository']['name']
-        docker_folder = modified_data[0]
-        file = modified_data[1]
 
-        if docker_folder not in config["folders_to_trigger_on"]:
-            api_response = {"message": "Container is not configured for this server."}
-            return jsonify(api_response)
+        # Looping the commits in the response
+        for commit in data["commits"]:
 
-        if file != "docker-compose.yml":
-            # If the file in the commit isn't a docker compose file, we're stopping
-            api_response = {"message": "Nothing was changed."}
-            return jsonify(api_response)
+            # Looping the modified files in the commit
+            for modified_file in commit["modified"]:
 
-        # Pull from the repository
-        run_command(
-            ["git", "pull", "--rebase"],
-            f"{local_path}/{repository_name}"
-        )
+                # Splitting the string of the modified file
+                modified_file_split = modified_file.rsplit("/", 1)
+                docker_folder = modified_file_split[0]
+                docker_file = modified_file_split[1]
 
-        # Restart the docker container as a background process and recreate
-        docker_restart_thread = threading.Thread(
-            target=run_command,
-            args=(["docker", "compose", "up", "-d", "--force-recreate"],
-            f"{local_path}/{repository_name}/{docker_folder}")
-        )
-        docker_restart_thread.start()
+                if docker_folder not in config["folders_to_trigger_on"]:
+                    api_response = {"message": "The container is not configured on this server."}
+                    return jsonify(api_response)
+
+                if docker_file != "docker-compose.yml":
+                    # If the file in the commit isn't a docker compose file, we're stopping
+                    api_response = {"message": "Nothing was changed."}
+                    return jsonify(api_response)
+
+                # Pull from the repository
+                run_command(
+                    ["git", "pull", "--rebase"],
+                    f"{local_path}/{repository_name}"
+                )
+
+                # Restart the docker container as a background process and recreate
+                docker_restart_thread = threading.Thread(
+                    target=run_command,
+                    args=(["docker", "compose", "up", "-d", "--force-recreate"],
+                    f"{local_path}/{repository_name}/{docker_folder}")
+                )
+                docker_restart_thread.start()
 
         api_response = {"message": "Success"}
         return jsonify(api_response)
