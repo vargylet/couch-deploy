@@ -97,6 +97,9 @@ def api_endpoint():
     :rtype: str
     """
 
+    # Reset the response data
+    json_response.clear()
+
     # The data from GitHub
     raw_data = request.data
 
