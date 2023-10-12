@@ -112,48 +112,54 @@ def api_endpoint():
         local_path = config["local_path"]
         repository_name = data['repository']['name']
 
-        # Looping the commits in the response
-        for commit in data["commits"]:
+        if data["commits"]:
+            # Looping the commits in the response
+            for commit in data["commits"]:
 
-            # Looping the modified files in the commit
-            for modified_file in commit["modified"]:
+                # Looping the modified files in the commit
+                for modified_file in commit["modified"]:
 
-                # Splitting the string of the modified file
-                modified_file_split = modified_file.rsplit("/", 1)
-                if len(modified_file_split) >= 2:
-                    docker_folder = modified_file_split[0]
-                    docker_file = modified_file_split[1]
-                else:
-                    docker_file = modified_file_split[0]
-                    docker_folder = f"No folder ({docker_file})"
+                    # Splitting the string of the modified file
+                    modified_file_split = modified_file.rsplit("/", 1)
+                    if len(modified_file_split) >= 2:
+                        docker_folder = modified_file_split[0]
+                        docker_file = modified_file_split[1]
+                    else:
+                        docker_file = modified_file_split[0]
+                        docker_folder = f"No folder ({docker_file})"
 
-                if docker_folder not in config["folders_to_trigger_on"]:
-                    # If the changed folder isn't configured on this server
-                    build_json_response(
-                        docker_folder,
-                        "The container is not configured on this server.")
-                    continue
+                    if docker_folder not in config["folders_to_trigger_on"]:
+                        # If the changed folder isn't configured on this server
+                        build_json_response(
+                            docker_folder,
+                            "The container is not configured on this server.")
+                        continue
 
-                if docker_file != "docker-compose.yml":
-                    # If the file in the commit isn't a docker compose file, we're stopping
-                    build_json_response(
-                        docker_folder,
-                        "The updated file wasn't a docker-compose.yml file.")
-                    continue
+                    if docker_file != "docker-compose.yml":
+                        # If the file in the commit isn't a docker compose file, we're stopping
+                        build_json_response(
+                            docker_folder,
+                            "The updated file wasn't a docker-compose.yml file.")
+                        continue
 
-                # Pull from the repository
-                run_command(
-                    ["git", "pull", "--rebase"],
-                    f"{local_path}/{repository_name}"
+                    # Pull from the repository
+                    run_command(
+                        ["git", "pull", "--rebase"],
+                        f"{local_path}/{repository_name}"
+                    )
+
+                    # Restart the docker container as a background process and recreate
+                    docker_restart_thread = threading.Thread(
+                        target=run_command,
+                        args=(["docker", "compose", "up", "-d", "--force-recreate"],
+                        f"{local_path}/{repository_name}/{docker_folder}")
+                    )
+                    docker_restart_thread.start()
+
+                build_json_response(
+                    "No folder (no data)",
+                    "The data provided couldn't be processed or was empty."
                 )
-
-                # Restart the docker container as a background process and recreate
-                docker_restart_thread = threading.Thread(
-                    target=run_command,
-                    args=(["docker", "compose", "up", "-d", "--force-recreate"],
-                    f"{local_path}/{repository_name}/{docker_folder}")
-                )
-                docker_restart_thread.start()
 
         response = {
             "result": "success",
