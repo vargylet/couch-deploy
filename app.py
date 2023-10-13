@@ -157,10 +157,12 @@ def api_endpoint():
                     )
                     docker_restart_thread.start()
 
-        build_json_response(
-            "No folder (no data)",
-            "The data provided couldn't be processed or was empty."
-        )
+        else:
+        # If there is no data to process
+            build_json_response(
+                "No folder (no data)",
+                "The data provided couldn't be processed or was empty."
+            )
 
         response = {
             "result": "success",
