@@ -27,10 +27,10 @@ I recommend running this application behind a reverse proxy.
 - `path` - This is the path that's used in the url. It can be anything you like.
 - `webhook_secret` - The webhook secret provided by GitHub when you configure a webhook.
 - `local_path` - The path where the folder of the repo is located.
-- `folders_to_trigger_on` - A list of folders that the script will act on. Maybe you don't run all your containers at the same server.
+- `folders_to_trigger_on` - A list of the folders that the script will act on.
 
 # Install
-I will assume you have the Technical Requirements installed.
+I will assume you have the Technical Requirements in place.
 
 ```
 # Clone this repository.
