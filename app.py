@@ -2,6 +2,7 @@
 Small API that picks up a webhook from Github and processes the data to update
 the local repository on the server.
 """
+import logging
 import json
 import subprocess
 import hmac
@@ -11,9 +12,30 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Reading the configuration file.
-with open("config.json", "r", encoding="utf-8)") as config_file:
-    config = json.load(config_file)
+# Initiate logging for loading the config file
+load_config_logger = logging.getLogger("load_config_logger")
+
+# Reading the configuration file
+try:
+    with open("config.json", "r", encoding="utf-8)") as config_file:
+        config = json.load(config_file)
+    load_config_logger.info("The config file was opened successfully")
+except FileNotFoundError:
+    load_config_logger.error("The config file could not be found")
+except PermissionError:
+    load_config_logger.error("The config file doesn't have the right permissions")
+except IOError:
+    load_config_logger.error("An I/O error occurred while trying to open the config file")
+
+# Creating logger for the app
+main_logger = logging.getLogger("__name__")
+
+# Set log level based on config file
+log_level = config.get("log_level", config["log_level"])
+app.logger.setLevel(log_level)
+
+# Adding main_logger to the handlers
+app.logger.addHandler(main_logger)
 
 # Defining a dictionary to store the response
 json_response = []
