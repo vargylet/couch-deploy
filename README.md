@@ -7,6 +7,17 @@ To use this application you need the following structure of your docker compose 
 - A GitHub repository where you store all docker compose files in one folder per application.
 - The docker compose files have to be named like this: `docker-compose.yml`.
 
+Example structure for repository:
+```
+<Repository>
+|-- <Folder1>
+|   |-- docker-compose.yml
+|
+|-- <Folder2>
+|   |-- docker-compose.yml
+|
+```
+
 ## Technical Requirements
 - python >= 3.11
 - flask >= 2.3.3
