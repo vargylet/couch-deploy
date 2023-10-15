@@ -28,14 +28,14 @@ except IOError:
     load_config_logger.error("An I/O error occurred while trying to open the config file")
 
 # Creating logger for the app
-main_logger = logging.getLogger("__name__")
+logger = logging.getLogger("__name__")
 
 # Set log level based on config file
 log_level = config.get("log_level", config["log_level"])
 app.logger.setLevel(log_level)
 
 # Adding main_logger to the handlers
-app.logger.addHandler(main_logger)
+app.logger.addHandler(logger)
 
 # Defining a dictionary to store the response
 json_response = []
@@ -73,6 +73,24 @@ def run_command(command, working_directory):
     :return: An error if an esception is thrown.
     :rtype: str
     """
+
+    def log_critical(command, working_directory, error):
+        """
+        A nested function to log critical messages.
+
+        :param command: The command that the script tried to run in the shell.
+        :type command: str
+        :param working_directory: The directory where the script tried to run the command.
+        :type working_directory: str
+        :return: An error message containing an error message.
+        :rtype: str
+        """
+        logger.critical(
+            "An error occured when running %s in %s. Error message: %s",
+            command, working_directory, error
+        )
+
+    # Trying to perform the provided command
     try:
         result = subprocess.run(
             command,
@@ -84,11 +102,14 @@ def run_command(command, working_directory):
         )
         return result.stdout
     except subprocess.CalledProcessError as error:
-        error_message = (
-            f"An error occured when running {command} in {working_directory}."
-            f"Error message: {error.stderr} ({error.returncode})"
-        )
-        return error_message
+        log_critical(str(command), working_directory, error.stderr)
+        return result.stderr
+    except subprocess.TimeoutExpired as error:
+        log_critical(str(command), working_directory, error.stderr)
+        return result.stderr
+    except OSError as error:
+        log_critical(str(command), working_directory, "OSError")
+        return result.stderr
 
 def build_json_response(docker_folder, result_message):
     """
