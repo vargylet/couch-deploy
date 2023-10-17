@@ -108,7 +108,7 @@ def run_command(command, working_directory):
             command, working_directory, error
         )
 
-    logger.debug("Running command on server: %s", command)
+    logger.info("Running command on server: %s", command)
     # Trying to perform the provided command
     try:
         result = subprocess.run(
@@ -189,7 +189,7 @@ def api_endpoint():
                 # Looping the modified files in the commit
                 for modified_file in commit["modified"]:
 
-                    logger.debug("Processing %s", modified_file)
+                    logger.info("Processing %s", modified_file)
 
                     # Splitting the string of the modified file
                     modified_file_split = modified_file.rsplit("/", 1)
@@ -218,11 +218,11 @@ def api_endpoint():
                         # If the file in the commit isn't a docker compose file, we're stopping
                         build_json_response(
                             docker_folder,
-                            "The updated file wasn't a docker-compose.yml file."
+                            "The updated file isn't a docker-compose.yml file."
                         )
 
                         logger.info(
-                            "The updated file wasn't a docker-compose.yml file: %s", docker_folder
+                            "The updated file isn't a docker-compose.yml file: %s", docker_folder
                         )
                         continue
 
@@ -232,7 +232,7 @@ def api_endpoint():
                         f"{local_path}/{repository_name}"
                     )
 
-                    # Restart the docker container as a background process and recreate
+                    # Restart the docker container and recreate it as a background process
                     docker_restart_thread = threading.Thread(
                         target=run_command,
                         args=(["docker", "compose", "up", "-d", "--force-recreate"],
@@ -264,7 +264,7 @@ def api_endpoint():
             }
         response_code = 403
 
-        logger.warning("Authentication failed.")
+        logger.warning("Authentication failed")
 
     return jsonify(response), response_code
 
