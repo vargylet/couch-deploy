@@ -3,6 +3,7 @@ Small API that picks up a webhook from Github and processes the data to update
 the local repository on the server.
 """
 import logging
+from logging.handlers import RotatingFileHandler
 import json
 import subprocess
 import hmac
@@ -19,7 +20,7 @@ load_config_logger = logging.getLogger("load_config_logger")
 try:
     with open("config.json", "r", encoding="utf-8)") as config_file:
         config = json.load(config_file)
-    load_config_logger.info("The config file was opened successfully")
+    load_config_logger.info("The config file was loaded successfully")
 except FileNotFoundError:
     load_config_logger.error("The config file could not be found")
 except PermissionError:
@@ -32,10 +33,20 @@ logger = logging.getLogger("__name__")
 
 # Set log level based on config file
 log_level = config.get("log_level", config["log_level"])
-app.logger.setLevel(log_level)
+logger.setLevel(log_level)
 
-# Adding main_logger to the handlers
-app.logger.addHandler(logger)
+# Adding file handler to write the logs to file
+LOG_FILE = "couch-deploy.log"
+file_handler = RotatingFileHandler(LOG_FILE, maxBytes=10240, backupCount=10)
+
+# Defining the formatting of the logging
+log_format = logging.Formatter(
+    "%(asctime)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+)
+file_handler.setFormatter(log_format)
+
+# Adding file handler to logger
+logger.addHandler(file_handler)
 
 # Defining a dictionary to store the response
 json_response = []
@@ -52,12 +63,19 @@ def validate_signature(data, github_signature):
     :return: True or false
     :rtype: bool
     """
+
     # Generate the signature with the secret
     expected_signature = "sha256=" + hmac.new(
         config["webhook_secret"].encode("utf-8"),
         data,
         hashlib.sha256
     ).hexdigest()
+
+    logger.debug(
+        "Validating incoming signature. Expected signature: %s - Incoming signature: %s",
+        expected_signature,
+        github_signature
+    )
 
     # Comparing the generated signature with the received signature
     return hmac.compare_digest(expected_signature, github_signature)
@@ -90,6 +108,7 @@ def run_command(command, working_directory):
             command, working_directory, error
         )
 
+    logger.debug("Running command on server: %s", command)
     # Trying to perform the provided command
     try:
         result = subprocess.run(
@@ -100,16 +119,19 @@ def run_command(command, working_directory):
             text=True,
             check=True
         )
+
+        logger.debug("stdout: %s", result.stdout)
         return result.stdout
+
     except subprocess.CalledProcessError as error:
         log_critical(str(command), working_directory, error.stderr)
-        return result.stderr
+        return error.stderr
     except subprocess.TimeoutExpired as error:
         log_critical(str(command), working_directory, error.stderr)
-        return result.stderr
+        return error.stderr
     except OSError as error:
         log_critical(str(command), working_directory, "OSError")
-        return result.stderr
+        return "OSError"
 
 def build_json_response(docker_folder, result_message):
     """
@@ -129,6 +151,8 @@ def build_json_response(docker_folder, result_message):
 
     # Append to the response list
     json_response.append(response)
+
+logger.info("The app started successfully. Waiting for signals...")
 
 @app.route(f"/{config['path']}", methods=["POST"])
 def api_endpoint():
@@ -160,8 +184,12 @@ def api_endpoint():
             # Looping the commits in the response
             for commit in data["commits"]:
 
+                logger.debug("Taking action on %s", commit)
+
                 # Looping the modified files in the commit
                 for modified_file in commit["modified"]:
+
+                    logger.debug("Processing %s", modified_file)
 
                     # Splitting the string of the modified file
                     modified_file_split = modified_file.rsplit("/", 1)
@@ -172,18 +200,30 @@ def api_endpoint():
                         docker_file = modified_file_split[0]
                         docker_folder = f"No folder ({docker_file})"
 
+                    logger.debug("Docker file: %s. Docker folder: %s", docker_file, docker_folder)
+
                     if docker_folder not in config["folders_to_trigger_on"]:
                         # If the changed folder isn't configured on this server
                         build_json_response(
                             docker_folder,
-                            "The container is not configured on this server.")
+                            "The container is not configured on this server"
+                        )
+
+                        logger.info(
+                            "The container is not configured on this server: %s", docker_folder
+                        )
                         continue
 
                     if docker_file != "docker-compose.yml":
                         # If the file in the commit isn't a docker compose file, we're stopping
                         build_json_response(
                             docker_folder,
-                            "The updated file wasn't a docker-compose.yml file.")
+                            "The updated file wasn't a docker-compose.yml file."
+                        )
+
+                        logger.info(
+                            "The updated file wasn't a docker-compose.yml file: %s", docker_folder
+                        )
                         continue
 
                     # Pull from the repository
@@ -201,23 +241,32 @@ def api_endpoint():
                     docker_restart_thread.start()
 
         else:
-        # If there is no data to process
+            # If there is no data to process
             build_json_response(
                 "No folder (no data)",
                 "The data provided couldn't be processed or was empty."
             )
 
+            logger.info("The response didn't hold any data to process")
+
         response = {
             "result": "success",
             "commits": json_response
         }
-        return jsonify(response)
+        response_code = 200
 
-    # Returns a 403 with an error if auth fails
-    response = {
-            "result": "Authentication failed."
-        }
-    return jsonify(response), 403
+        logger.info("Successful run")
+
+    else:
+        # If authentication failed
+        response = {
+                "result": "Authentication failed."
+            }
+        response_code = 403
+
+        logger.warning("Authentication failed.")
+
+    return jsonify(response), response_code
 
 if __name__ == "__main__":
     app.run()
