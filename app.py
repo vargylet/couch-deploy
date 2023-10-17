@@ -37,7 +37,7 @@ logger.setLevel(log_level)
 
 # Adding file handler to write the logs to file
 LOG_FILE = "couch-deploy.log"
-file_handler = RotatingFileHandler(LOG_FILE, maxBytes=10240, backupCount=10)
+file_handler = RotatingFileHandler(LOG_FILE, maxBytes=10240, backupCount=5)
 
 # Defining the formatting of the logging
 log_format = logging.Formatter(
