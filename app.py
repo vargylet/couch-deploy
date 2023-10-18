@@ -16,7 +16,7 @@ app = Flask(__name__)
 # Creating logger for the app
 logger = logging.getLogger("__name__")
 
-# Set log level based on config file
+# Set log level for opening the config file
 logger.setLevel("INFO")
 
 # Adding file handler to write the logs to file
@@ -133,25 +133,6 @@ def run_command(command, working_directory):
         log_critical(str(command), working_directory, "OSError")
         return "OSError"
 
-def build_json_response(docker_folder, result_message):
-    """
-    Received information about what should go into the json output and appends it.
-
-    :param docker_folder: The folder which has a change to it which will be passed to the output.
-    :type docker_folder: str
-    :param result_message: The message that will be passed to the output.
-    :type result_message: str
-    :return: A string formatted as JSON
-    :rtype: json
-    """
-    response = {
-        "folder": docker_folder,
-        "result": result_message
-    }
-
-    # Append to the response list
-    json_response.append(response)
-
 logger.info("The app started successfully. Waiting for signals...")
 
 @app.route(f"/{config['path']}", methods=["POST"])
@@ -163,9 +144,6 @@ def api_endpoint():
     :return: A HTML respons, either 200 or an error code.
     :rtype: str
     """
-
-    # Reset the response data
-    json_response.clear()
 
     # The data from GitHub
     raw_data = request.data
@@ -204,11 +182,6 @@ def api_endpoint():
 
                     if docker_folder not in config["folders_to_trigger_on"]:
                         # If the changed folder isn't configured on this server
-                        build_json_response(
-                            docker_folder,
-                            "The container is not configured on this server"
-                        )
-
                         logger.info(
                             "The container is not configured on this server: %s", docker_folder
                         )
@@ -216,11 +189,6 @@ def api_endpoint():
 
                     if docker_file != "docker-compose.yml":
                         # If the file in the commit isn't a docker compose file, we're stopping
-                        build_json_response(
-                            docker_folder,
-                            "The updated file isn't a docker-compose.yml file."
-                        )
-
                         logger.info(
                             "The updated file isn't a docker-compose.yml file: %s", docker_folder
                         )
@@ -241,17 +209,10 @@ def api_endpoint():
                     docker_restart_thread.start()
 
         else:
-            # If there is no data to process
-            build_json_response(
-                "No folder (no data)",
-                "The data provided couldn't be processed or was empty."
-            )
-
             logger.info("The response didn't hold any data to process")
 
         response = {
-            "result": "success",
-            "commits": json_response
+            "result": "Success"
         }
         response_code = 200
 
@@ -260,11 +221,11 @@ def api_endpoint():
     else:
         # If authentication failed
         response = {
-                "result": "Authentication failed."
+                "result": "Authentication failed"
             }
         response_code = 403
 
-        logger.warning("Authentication failed")
+        logger.warning("Authentication failed from %s", request.remote_addr)
 
     return jsonify(response), response_code
 
