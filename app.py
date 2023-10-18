@@ -9,7 +9,7 @@ import subprocess
 import hmac
 import hashlib
 import threading
-from flask import Flask, request, jsonify
+from flask import Flask, request
 
 app = Flask(__name__)
 
@@ -47,9 +47,6 @@ except IOError:
 # Set log level based on config file
 log_level = config.get("log_level", config["log_level"])
 logger.setLevel(log_level)
-
-# Defining a dictionary to store the response
-json_response = []
 
 def validate_signature(data, github_signature):
     """
@@ -151,6 +148,9 @@ def api_endpoint():
     # Get the request signature and payload
     github_signature = request.headers.get("X-Hub-Signature-256")
 
+    if github_signature is None:
+        return "Authentication failed", 400
+
     if validate_signature(raw_data, github_signature):
 
         data = json.loads(raw_data)
@@ -211,23 +211,19 @@ def api_endpoint():
         else:
             logger.info("The response didn't hold any data to process")
 
-        response = {
-            "result": "Success"
-        }
+        response = "Success"
         response_code = 200
 
         logger.info("Successful run")
 
     else:
         # If authentication failed
-        response = {
-                "result": "Authentication failed"
-            }
+        response = "Authentication failed"
         response_code = 403
 
         logger.warning("Authentication failed from %s", request.remote_addr)
 
-    return jsonify(response), response_code
+    return response, response_code
 
 if __name__ == "__main__":
     app.run()
