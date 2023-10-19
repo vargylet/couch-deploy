@@ -39,7 +39,7 @@ I recommend running this application behind a reverse proxy.
 - `log_level` - Default is `INFO`. Can be changed to `DEBUG`, `WARNING`, or `CRITICAL`.
 - `path` - This is the path that's used in the url. It can be anything you like.
 - `webhook_secret` - The webhook secret you choose when configuring the GitHub webhook.
-- `local_path` - The path where the folder of the repo is located.
+- `local_path` - The path where the folder of the repo is located. No trailing slash!
 - `folders_to_trigger_on` - A list of the folders that the script will act on.
 
 # Install
