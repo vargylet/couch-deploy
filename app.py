@@ -77,7 +77,7 @@ def validate_signature(data, github_signature):
     # Comparing the generated signature with the received signature
     return hmac.compare_digest(expected_signature, github_signature)
 
-def run_command(command, working_directory):
+def run_command(command, working_directory, redirect_output=False):
     """
     Runs a command in the shell on the server in the pre-defined directory.
 
@@ -108,15 +108,25 @@ def run_command(command, working_directory):
     logger.info("Running command on server: %s", command)
     # Trying to perform the provided command
     try:
-        result = subprocess.run(
-            command,
-            cwd=working_directory,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            check=True,
-            timeout=60
-        )
+        if redirect_output is False:
+            result = subprocess.run(
+                command,
+                cwd=working_directory,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=True,
+            )
+        else:
+            result = subprocess.run(
+                command,
+                cwd=working_directory,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                check=True,
+                timeout=60
+            )
 
         logger.debug("stdout: %s", result.stdout)
         return result.stdout
@@ -205,8 +215,11 @@ def api_endpoint():
                 # Restart the docker container and recreate it as a background process
                 docker_restart_thread = threading.Thread(
                         target=run_command,
-                        args=(["docker", "compose", "up", "-d", "--force-recreate"],
-                        f"{local_path}/{repository_name}/{docker_folder}")
+                        args=(
+                            ["docker", "compose", "up", "-d", "--force-recreate"],
+                            f"{local_path}/{repository_name}/{docker_folder}",
+                            True
+                        ),
                     )
 
                 try:
