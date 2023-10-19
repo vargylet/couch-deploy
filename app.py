@@ -114,7 +114,8 @@ def run_command(command, working_directory):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            check=True
+            check=True,
+            timeout=60
         )
 
         logger.debug("stdout: %s", result.stdout)
@@ -203,11 +204,19 @@ def api_endpoint():
 
                 # Restart the docker container and recreate it as a background process
                 docker_restart_thread = threading.Thread(
-                    target=run_command,
-                    args=(["docker", "compose", "up", "-d", "--force-recreate"],
-                    f"{local_path}/{repository_name}/{docker_folder}")
-                )
-                docker_restart_thread.start()
+                        target=run_command,
+                        args=(["docker", "compose", "up", "-d", "--force-recreate"],
+                        f"{local_path}/{repository_name}/{docker_folder}")
+                    )
+
+                try:
+                    docker_restart_thread.start()
+                except (subprocess.CalledProcessError) as error:
+                    logger.critical("The command failed with a non-zero error: %s", error)
+                except subprocess.TimeoutExpired as error:
+                    logger.critical("The process timed out: %s", error)
+                except OSError as error:
+                    logger.critical("An OSError occured: %s", error)
 
     else:
         logger.info("The response didn't hold any data to process")
