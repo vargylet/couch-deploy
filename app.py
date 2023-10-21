@@ -132,7 +132,10 @@ def run_command(command, working_directory, redirect_output=False):
         return result.stdout
 
     except subprocess.CalledProcessError as error:
-        log_critical(str(command), working_directory, error.stderr)
+        if error.stderr is None:
+            log_critical(str(command), working_directory, error.stdout)
+        else:
+            log_critical(str(command), working_directory, error.stderr)
         return error.stderr
     except subprocess.TimeoutExpired as error:
         log_critical(str(command), working_directory, error.stderr)
