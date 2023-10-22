@@ -125,7 +125,7 @@ def run_command(command, working_directory, redirect_output=False):
                 stderr=subprocess.STDOUT,
                 text=True,
                 check=True,
-                timeout=60
+                timeout=120
             )
 
         logger.debug("stdout: %s", result.stdout)
