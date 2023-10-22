@@ -13,14 +13,25 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
+# Log level mapping to convert config string to logging constant
+LOG_LEVEL_MAP = {
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "WARNING": logging.WARNING,
+    "ERROR": logging.ERROR,
+    "CRITICAL": logging.CRITICAL
+}
+
+# Log file to store logs
+LOG_FILE = "couch-deploy.log"
+
 # Creating logger for the app
 logger = logging.getLogger("__name__")
 
 # Set log level for opening the config file
-logger.setLevel("INFO")
+logger.setLevel(logging.INFO)
 
 # Adding file handler to write the logs to file
-LOG_FILE = "couch-deploy.log"
 file_handler = RotatingFileHandler(LOG_FILE, maxBytes=10240, backupCount=5)
 
 # Defining the formatting of the logging
@@ -45,7 +56,8 @@ except IOError:
     logger.error("An I/O error occurred while trying to open the config file")
 
 # Set log level based on config file
-log_level = config.get("log_level", config["log_level"])
+log_level_str = config.get("log_level", "INFO")
+log_level = LOG_LEVEL_MAP.get(log_level_str, logging.INFO)
 logger.setLevel(log_level)
 
 def validate_signature(data, github_signature):
