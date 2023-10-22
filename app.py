@@ -141,6 +141,7 @@ def run_command(command, working_directory, redirect_output=False):
             )
 
         logger.debug("stdout: %s", result.stdout)
+        logger.info("%s was restarted.", working_directory)
         return result.stdout
 
     except subprocess.CalledProcessError as error:
