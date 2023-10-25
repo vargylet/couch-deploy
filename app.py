@@ -101,22 +101,6 @@ def run_command(command, working_directory, redirect_output=False):
     :rtype: str
     """
 
-    def log_critical(command, working_directory, error):
-        """
-        A nested function to log critical messages.
-
-        :param command: The command that the script tried to run in the shell.
-        :type command: str
-        :param working_directory: The directory where the script tried to run the command.
-        :type working_directory: str
-        :return: An error message containing an error message.
-        :rtype: str
-        """
-        logger.critical(
-            "An error occured when running %s in %s. Error message: %s",
-            command, working_directory, error
-        )
-
     logger.info("Running command on server: %s", command)
     # Trying to perform the provided command
     try:
@@ -145,19 +129,26 @@ def run_command(command, working_directory, redirect_output=False):
         return result.stdout
 
     except subprocess.CalledProcessError as error:
+        # Defining error message
+        error_msg = f"CalledProcessError occurred while running {command} in {working_directory}."
         if error.stderr is None:
-            log_critical(str(command), working_directory, error.stdout)
+            logger.critical(error_msg + f"Error: {error.stdout}")
         else:
-            log_critical(str(command), working_directory, error.stderr)
+            logger.critical(error_msg + f"Error: {error.stderr}")
         return error.stderr
     except subprocess.TimeoutExpired as error:
+        # Defining error message
+        error_msg = f"A timeout occurred while running {command} in {working_directory}."
         if error.stderr is None:
-            log_critical(str(command), working_directory, error.stdout)
+            logger.critical(error_msg + f"Error: {error.stdout}")
         else:
-            log_critical(str(command), working_directory, error.stderr)
+            logger.critical(error_msg + f"Error: {error.stderr}")
         return error.stderr
     except OSError as error:
-        log_critical(str(command), working_directory, "OSError")
+        logger.critical(
+            "An OSError occured while running %s in %s. Error: OSError",
+            command, working_directory
+        )
         return "OSError"
 
 logger.info("The app started successfully. Waiting for signals...")
