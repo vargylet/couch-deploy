@@ -146,10 +146,10 @@ def run_command(command, working_directory, redirect_output=False):
         return error.stderr
     except OSError as error:
         logger.critical(
-            "An OSError occured while running %s in %s. Error: OSError",
-            command, working_directory
+            "An OSError occured while running %s in %s. Error: %s",
+            command, working_directory, error
         )
-        return "OSError"
+        return error
 
 logger.info("The app started successfully. Waiting for signals...")
 
