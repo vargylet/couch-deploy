@@ -3,7 +3,6 @@ Authentication of the incoming GitHub webhook.
 """
 import hmac
 import hashlib
-# from app import logger, config
 from .config_logger import config_logger
 
 # Load the config

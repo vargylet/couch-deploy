@@ -2,7 +2,6 @@
 This file holds all commands that the application can run on the server.
 """
 import subprocess
-# from app import logger
 from .config_logger import config_logger
 
 
