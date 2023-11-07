@@ -73,7 +73,7 @@ class ConfigLogger:
         self.logger.setLevel(logging.INFO)
 
         # Adding file handler to write the logs to file
-        file_handler = RotatingFileHandler(log_file_name, maxBytes=10240, backupCount=5)
+        file_handler = RotatingFileHandler(log_file_name, maxBytes=100000, backupCount=5)
 
         # Defining the formatting of the logging
         log_format = logging.Formatter(
