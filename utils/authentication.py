@@ -25,14 +25,14 @@ def github_signature(data, signature):
     """
 
     # Generate the signature with the secret
-    expected_signature = "sha256=" + hmac.new(
-        config["webhook_secret"].encode("utf-8"),
+    expected_signature = 'sha256=' + hmac.new(
+        config['webhook_secret'].encode('utf-8'),
         data,
         hashlib.sha256
     ).hexdigest()
 
     logger.debug(
-        "Validating incoming signature. Expected signature: %s - Incoming signature: %s",
+        'Validating incoming signature. Expected signature: %s - Incoming signature: %s',
         expected_signature,
         signature
     )
