@@ -8,8 +8,6 @@ from utils.config_logger import config_logger
 
 app = Flask(__name__)
 
-# Loading the config
-config = config_logger.config
 # Initalizing the logger
 logger = config_logger.logger
 
