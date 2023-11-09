@@ -2,7 +2,7 @@
 This file holds all commands that the application can run on the server.
 """
 import subprocess
-from .logger import logger
+from .logger import logging
 
 
 def run_command(command, working_directory, redirect_output=False):
@@ -17,8 +17,8 @@ def run_command(command, working_directory, redirect_output=False):
     :rtype: str
     """
 
-    # Initiate the logger
-    logger = logger.logger
+    # Store the logger attribute
+    logger = logging.logger
 
     logger.info('Running command on server: %s', command)
     # Trying to perform the provided command

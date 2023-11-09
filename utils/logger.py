@@ -62,4 +62,4 @@ class Logger:
         log_level = log_level_map.get(log_level_str, logging.INFO)
         self.logger.setLevel(log_level)
 
-logger = Logger()
+logging = Logger()
