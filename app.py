@@ -2,7 +2,7 @@
 Small API that picks up a webhook from Github and processes the data to update
 the local repository on the server.
 """
-from flask import Flask#, request
+from flask import Flask
 from routes.routes import api_endpoint
 from utils.logger import logger
 
