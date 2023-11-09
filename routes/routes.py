@@ -5,14 +5,15 @@ import json
 import subprocess
 import threading
 from flask import request, Blueprint
-from utils.config_logger import config_logger
+from utils.config_loader import config_loader
+from utils.logger import logger
 from utils.authentication import github_signature
 from utils.server_commands import run_command
 
-# Load the config
-config = config_logger.config
-# Initialize the logger
-logger = config_logger.logger
+# Store the config attribute
+config = config_loader.config
+# Store the logger attribute
+logger = logger.logger
 
 # Creating Blueprints for routes
 api_endpoint = Blueprint('api_endpoint', __name__)

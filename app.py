@@ -4,12 +4,12 @@ the local repository on the server.
 """
 from flask import Flask#, request
 from routes.routes import api_endpoint
-from utils.config_logger import config_logger
+from utils.logger import logger
 
 app = Flask(__name__)
 
 # Initalizing the logger
-logger = config_logger.logger
+logger = logger.logger
 
 # Register flask blueprints
 app.register_blueprint(api_endpoint)

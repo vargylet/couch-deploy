@@ -3,12 +3,13 @@ Authentication of the incoming GitHub webhook.
 """
 import hmac
 import hashlib
-from .config_logger import config_logger
+from .config_loader import config_loader
+from .logger import logger
 
-# Load the config
-config = config_logger.config
-# Initiate the logger
-logger = config_logger.logger
+# Store the config attribute
+config = config_loader.config
+# Store the logger attribute
+logger = logger.logger
 
 
 def github_signature(data, signature):
