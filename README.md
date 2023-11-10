@@ -19,7 +19,7 @@ Example structure for repository:
 ```
 
 ## Technical Requirements
-- python >= 3.11
+- python >= 3.9.2 (lowest tested version)
 - flask >= 2.3.3
 - gunicorn >= 21.2.0
 
