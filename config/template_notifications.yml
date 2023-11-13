@@ -1,0 +1,6 @@
+urls:
+  # Example configurations. Configure your own and remove or comment out the rest.
+  # Find more supported notifications at:
+  # https://github.com/caronc/apprise#supported-notifications
+  # - slack://{oauth_token}/#{channel_name}?footer=no
+  # - discord://{webhook_id}/{webhook_token}

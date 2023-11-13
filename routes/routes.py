@@ -9,6 +9,7 @@ from utils.config_loader import config_loader
 from utils.logger import logging
 from utils.authentication import github_signature
 from utils.server_commands import run_command
+from utils.notifications import Notifications
 
 # Store the config attribute
 config = config_loader.config
@@ -28,6 +29,8 @@ def api_endpoint_github():
     :return: A HTML respons, either 200 or an error code.
     :rtype: str
     """
+    # Initiate notifications
+    notify = Notifications()
 
     # The data from GitHub
     raw_data = request.data
@@ -38,6 +41,7 @@ def api_endpoint_github():
     # Verifying that the signature is not empty or didn't match
     if github_signature_data is None or not github_signature(raw_data, github_signature_data):
         logger.warning('Authentication failed from %s', request.remote_addr)
+        notify.warning(f'*Authentication failed* from {request.remote_addr}')
 
         return 'Authentication failed', 400
 
@@ -102,10 +106,13 @@ def api_endpoint_github():
                     docker_restart_thread.start()
                 except (subprocess.CalledProcessError) as error:
                     logger.critical('The command failed with a non-zero error: %s', error)
+                    notify.failure(f'The command failed with a non-zero error: {error}')
                 except subprocess.TimeoutExpired as error:
                     logger.critical('The process timed out: %s', error)
+                    notify.failure(f'The process timed out: {error}')
                 except OSError as error:
                     logger.critical('An OSError occured: %s', error)
+                    notify.failure(f'An OSError occured: {error}')
 
     else:
         logger.info('The response didn\'t hold any data to process')
