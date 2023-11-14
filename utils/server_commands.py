@@ -52,35 +52,34 @@ def run_command(command, working_directory, redirect_output=False):
             )
 
         logger.debug('stdout: %s', result.stdout)
-        logger.info('%s was restarted.', working_directory)
+        logger.info('Successfully ran: %s', working_directory)
         notify.success(f'*Successfully ran:* {command_formatted}')
-        return result.stdout
 
     except subprocess.CalledProcessError as error:
         # Defining error message
         error_msg = f'CalledProcessError occurred while running {command} in {working_directory}.'
         if error.stderr is None:
-            logger.critical(error_msg + f'Error: {error.stdout}')
+            logger.critical(f'{error_msg} Error: {error.stdout}')
             notify.failure(f'{error_msg} Error: {error.stdout}')
         else:
-            logger.critical(error_msg + f'Error: {error.stderr}')
+            logger.critical(f'{error_msg} Error: {error.stderr}')
             notify.failure(f'{error_msg} Error: {error.stderr}')
-        return error.stderr
+
     except subprocess.TimeoutExpired as error:
         # Defining error message
         error_msg = f'A timeout occurred while running {command} in {working_directory}.'
         if error.stderr is None:
-            logger.critical(error_msg + f'Error: {error.stdout}')
+            logger.critical(f'{error_msg} Error: {error.stdout}')
             notify.failure(f'{error_msg} Error: {error.stdout}')
         else:
-            logger.critical(error_msg + f'Error: {error.stderr}')
+            logger.critical(f'{error_msg} Error: {error.stderr}')
             notify.failure(f'{error_msg} Error: {error.stderr}')
-        return error.stderr
+
     except OSError as error:
+        # Defining error message
         error_msg = (
             f'An OSError occured while running {command} in {working_directory}. '
             f'Error: {error}'
         )
         logger.critical(error_msg)
         notify.failure(error_msg)
-        return error
