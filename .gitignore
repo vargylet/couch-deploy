@@ -162,3 +162,5 @@ cython_debug/
 # Couch Deploy specific
 config.json
 couch-deploy.log
+app_config.yml
+notifications.yml
