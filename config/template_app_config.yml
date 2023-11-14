@@ -1,0 +1,9 @@
+log_level: INFO
+notification_level: SUCCESS
+path: path/to/the/instance
+webhook_secret: 40e27b64010c2f41685a04e25ba1c621aeb6b0d03e933c72f6be68de07ccebe6
+local_path: /home/johndoe
+folders_to_trigger_on:
+  - paperless-ngx
+  - bookstack
+  - miniflux
