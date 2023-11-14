@@ -26,8 +26,8 @@ def run_command(command, working_directory, redirect_output=False):
     # Variable command converted to string and nicely formatted
     command_formatted = ' '.join(command)
 
-    logger.info('Running command on server: %s', command)
-    notify.info(f'*Running command:* {command_formatted}')
+    logger.info('Running command %s in %s', command, working_directory)
+    notify.info(f'Running command *{command_formatted}* in *{working_directory}*')
 
     # Trying to perform the provided command
     try:
@@ -52,28 +52,28 @@ def run_command(command, working_directory, redirect_output=False):
             )
 
         logger.debug('stdout: %s', result.stdout)
-        logger.info('Successfully ran: %s', working_directory)
-        notify.success(f'*Successfully ran:* {command_formatted}')
+        logger.info('Successfully ran %s in %s', command_formatted, working_directory)
+        notify.success(f'Successfully ran *{working_directory}* in *{command_formatted}*')
 
     except subprocess.CalledProcessError as error:
         # Defining error message
         error_msg = f'CalledProcessError occurred while running {command} in {working_directory}.'
         if error.stderr is None:
             logger.critical(f'{error_msg} Error: {error.stdout}')
-            notify.failure(f'{error_msg} Error: {error.stdout}')
+            notify.failure(f'{error_msg} *Error:* {error.stdout}')
         else:
             logger.critical(f'{error_msg} Error: {error.stderr}')
-            notify.failure(f'{error_msg} Error: {error.stderr}')
+            notify.failure(f'{error_msg} *Error:* {error.stderr}')
 
     except subprocess.TimeoutExpired as error:
         # Defining error message
         error_msg = f'A timeout occurred while running {command} in {working_directory}.'
         if error.stderr is None:
             logger.critical(f'{error_msg} Error: {error.stdout}')
-            notify.failure(f'{error_msg} Error: {error.stdout}')
+            notify.failure(f'{error_msg} *Error:* {error.stdout}')
         else:
             logger.critical(f'{error_msg} Error: {error.stderr}')
-            notify.failure(f'{error_msg} Error: {error.stderr}')
+            notify.failure(f'{error_msg} *Error:* {error.stderr}')
 
     except OSError as error:
         # Defining error message
