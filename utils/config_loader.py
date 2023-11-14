@@ -1,8 +1,8 @@
 """
 Handling of the config file.
 """
-import json
 import logging
+import yaml
 
 class ConfigLoader:
     """
@@ -25,13 +25,13 @@ class ConfigLoader:
         Loads the config from the 'config.json' file into the 'config' attribute.
         """
         # Config file
-        config_file_name = 'config.json'
+        config_file_name = 'config/app_config.yml'
 
         # Reading the configuration file
         try:
             with open(config_file_name, 'r', encoding='utf-8)') as config_file:
-                self.config = json.load(config_file)
-            logging.info('The config file was loaded successfully.')
+                self.config = yaml.safe_load(config_file)
+            logging.info('%s was loaded successfully.', config_file_name)
         except FileNotFoundError:
             logging.critical('The config file could not be found.')
         except PermissionError:
