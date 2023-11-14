@@ -14,8 +14,8 @@ def run_command(command, working_directory, redirect_output=False):
     :type command: list
     :param working_directory: The directory where we run the command.
     :type working_directory: str
-    :return: An error if an esception is thrown.
-    :rtype: str
+    :param redirect_output: This will send the output from subprocess.STDOUT to stderr.
+    :type command: bool
     """
 
     # Store the logger attribute
