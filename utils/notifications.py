@@ -4,6 +4,7 @@ It is used to send human readable notifications.
 """
 from apprise import Apprise, AppriseConfig, NotifyType
 from .logger import logging
+from .config_loader import config_loader
 
 class Notifications():
     """
@@ -19,15 +20,27 @@ class Notifications():
         """
         # Store the logger attribute
         logger = logging.logger
+        # Store the config attribute
+        config = config_loader.config
+
+        # Creating a dictionary for the notification levels
+        notification_levels_dict = {
+            'INFO': 10,
+            'SUCCESS': 20,
+            'WARNING': 30,
+            'FAILURE': 40
+        }
+        # Store the notification level based on config and dictionary
+        self.notify_level = notification_levels_dict.get(config['notification_level'], 20)
 
         # Initiate apprice object
         self.notification_object = Apprise()
         # Initiate apprise config object
-        config = AppriseConfig()
+        apprise_config = AppriseConfig()
         # Add config from notification config file
-        config.add('config/notifications.yml')
+        apprise_config.add('config/notifications.yml')
         # Add apprise config to apprise object
-        self.notification_object.add(config)
+        self.notification_object.add(apprise_config)
 
         # Storing the number of notification services configured
         self.loaded_services = len(self.notification_object)
@@ -42,7 +55,7 @@ class Notifications():
         :param title: The title added the notification.
         :type title: str
         """
-        if self.loaded_services >= 1:
+        if self.loaded_services >= 1 and self.notify_level <= 10:
             self.notification_object.notify(
                 body=body,
                 title=title,
@@ -58,7 +71,7 @@ class Notifications():
         :param title: The title added the notification.
         :type title: str
         """
-        if self.loaded_services >= 1:
+        if self.loaded_services >= 1 and self.notify_level <= 20:
             self.notification_object.notify(
                 body=body,
                 title=title,
@@ -74,7 +87,7 @@ class Notifications():
         :param title: The title added the notification.
         :type title: str
         """
-        if self.loaded_services >= 1:
+        if self.loaded_services >= 1 and self.notify_level <= 30:
             self.notification_object.notify(
                 body=body,
                 title=title,
@@ -90,7 +103,7 @@ class Notifications():
         :param title: The title added the notification.
         :type title: str
         """
-        if self.loaded_services >= 1:
+        if self.loaded_services >= 1 and self.notify_level <= 40:
             self.notification_object.notify(
                 body=body,
                 title=title,
