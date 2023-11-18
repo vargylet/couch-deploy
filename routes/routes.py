@@ -52,6 +52,14 @@ def api_endpoint_github():
     if 'commits' in data:
         # Verifying that 'commits' is present in the received data
         # Looping the commits in the response
+
+        # Pull and rebase from the repository
+        run_command(
+            ['git', 'pull', '--rebase'],
+            f'{local_path}/{repository_name}'
+        )
+
+        # Looping the commits done in the push
         for commit in data['commits']:
 
             logger.debug('Taking action on %s', commit)
@@ -85,12 +93,6 @@ def api_endpoint_github():
                         'The updated file isn\'t a docker-compose.yml file: %s', docker_folder
                     )
                     continue
-
-                # Pull from the repository
-                run_command(
-                    ['git', 'pull', '--rebase'],
-                    f'{local_path}/{repository_name}'
-                )
 
                 # Restart the docker container and recreate it as a background process
                 docker_restart_thread = threading.Thread(
