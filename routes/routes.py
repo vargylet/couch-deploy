@@ -122,3 +122,16 @@ def api_endpoint_github():
     logger.info('Successful run')
 
     return 'Success', 200
+
+
+@api_endpoint.route(f'/{config["path"]}/ping')
+def ping():
+    """
+    This route can be used to monitor that the application is running.
+
+    :return: An HTML 200 response saying 'Success'.
+    :rtype: str
+    """
+    logger.debug('Ping path was accessed by %s', request.remote_addr)
+
+    return 'Success', 200
