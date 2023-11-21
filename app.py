@@ -14,7 +14,5 @@ logger = logging.logger
 # Register flask blueprints
 app.register_blueprint(api_endpoint)
 
-logger.info('The app started successfully. Waiting for signals...')
-
 if __name__ == '__main__':
     app.run()
