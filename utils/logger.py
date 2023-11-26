@@ -2,7 +2,8 @@
 Defining the logger for the application.
 """
 import logging
-from logging.handlers import RotatingFileHandler
+import queue
+from logging.handlers import RotatingFileHandler, QueueHandler, QueueListener
 from .config_loader import config_loader
 
 class Logger:
@@ -61,6 +62,15 @@ class Logger:
         log_level_str = config.get('log_level', 'INFO')
         log_level = log_level_map.get(log_level_str, logging.INFO)
         self.logger.setLevel(log_level)
+
+        # Creating a queue to handle log messages
+        log_queue = queue.Queue(-1)
+        queue_handler = QueueHandler(log_queue)
+        self.logger.addHandler(queue_handler)
+
+        # Adding QueueListener to handle log messages from multiple processes
+        queue_listener = QueueListener(log_queue, file_handler)
+        queue_listener.start()
 
         self.logger.info("Logging has been successfully initiated during startup.")
 
