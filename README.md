@@ -60,7 +60,7 @@ cp template_app_config.yml app_config.yml
 nano app_config.yml
 
 # Choose your port and start the application.
-gunicorn -w 1 -b 0.0.0.0:<PORT_NUMBER> app:app
+gunicorn -w 2 -b 0.0.0.0:<PORT_NUMBER> --preload wsgi:app
 ```
 
 ## 💡 Feedback
