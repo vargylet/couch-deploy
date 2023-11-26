@@ -56,7 +56,8 @@ def api_endpoint_github():
         # Pull and rebase from the repository
         run_command(
             ['git', 'pull', '--rebase'],
-            f'{local_path}/{repository_name}'
+            f'{local_path}/{repository_name}',
+            False
         )
 
         # Looping the commits done in the push
@@ -100,6 +101,7 @@ def api_endpoint_github():
                         args=(
                             ['docker', 'compose', 'up', '-d', '--force-recreate'],
                             f'{local_path}/{repository_name}/{docker_folder}',
+                            True,
                             True
                         ),
                     )

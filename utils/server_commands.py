@@ -6,7 +6,7 @@ from .logger import logging
 from .notifications import Notifications
 
 
-def run_command(command, working_directory, redirect_output=False):
+def run_command(command, working_directory, success_notify=True, redirect_output=False):
     """
     Runs a command in the shell on the server in the pre-defined directory.
 
@@ -14,6 +14,8 @@ def run_command(command, working_directory, redirect_output=False):
     :type command: list
     :param working_directory: The directory where we run the command.
     :type working_directory: str
+    :param success_notify: Set this boolean to False to disable notifications for notify.success()
+    :type success_notify: bool
     :param redirect_output: This will send the output from subprocess.STDOUT to stderr.
     :type command: bool
     """
@@ -53,7 +55,10 @@ def run_command(command, working_directory, redirect_output=False):
 
         logger.debug('stdout: %s', result.stdout)
         logger.info('Successfully ran %s in %s', command_formatted, working_directory)
-        notify.success(f'Successfully ran *{working_directory}* in *{command_formatted}*')
+
+        if success_notify is True:
+            # Send notification if the command that just ran should notify
+            notify.success(f'Successfully ran *{working_directory}* in *{command_formatted}*')
 
     except subprocess.CalledProcessError as error:
         # Defining error message
